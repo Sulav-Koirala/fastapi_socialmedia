@@ -1,3 +1,4 @@
 .env
 __pycache__
 fapi_prac/
+app/main.py
