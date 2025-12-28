@@ -2,3 +2,4 @@
 __pycache__
 fapi_prac/
 app/main.py
+.env.dev
