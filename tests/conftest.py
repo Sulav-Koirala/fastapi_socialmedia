@@ -5,24 +5,31 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from app.database import get_db,Base
 import pytest
+from app.oauth2 import create_accesstoken
+from app import models
 
 sqlalchemy_db_url=f"postgresql://{settings.db_username}:{settings.db_pwd}@{settings.db_hostname}:{settings.db_port}/{settings.db_name}_test"
 engine=create_engine(sqlalchemy_db_url)
 session_local=sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def override_get_db():
+@pytest.fixture()
+def session():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     db=session_local()
     try:
         yield db
     finally:
         db.close()
 
-app.dependency_overrides[get_db]=override_get_db
-
 @pytest.fixture()
-def client():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+def client(session):
+    def override_get_db():
+        try:
+            yield session
+        finally:
+            session.close()
+    app.dependency_overrides[get_db]=override_get_db
     yield TestClient(app)
 
 @pytest.fixture
@@ -34,3 +41,27 @@ def test_user(client):
     new_user=res.json()
     new_user["password"]=user_data["password"]
     return new_user
+
+@pytest.fixture
+def token(test_user):
+    return create_accesstoken({"user_id":test_user['id']})
+
+@pytest.fixture
+def auth_client(client,token):
+    client.headers={
+        **client.headers,
+        "Authorization":f"Bearer {token}"
+    }
+    return client
+
+@pytest.fixture
+def test_post(session,test_user):
+    post_data=[{"title": "hello", "content":"i am saying hello", "post": False,"rating": 7, "user_id": test_user['id']},]
+    def create_posts_model(post):
+        return models.Post(**post) 
+    post_map = map(create_posts_model, post_data)
+    posts=list(post_map)
+    session.add_all(posts)
+    session.commit()
+    final = session.query(models.Post).all()
+    return final
