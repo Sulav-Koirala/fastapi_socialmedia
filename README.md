@@ -1,19 +1,34 @@
-FastAPI Social Media App
+# Social Media App API
 
-Backend API built with FastAPI and PostgreSQL for user authentication and posts.
+A simple backend API for a social media application built with **FastAPI** and **PostgreSQL**.
 
-Setup:
+## Features
 
-Clone repo and create virtual environment
+* User authentication
+* Create & view posts
+* Like posts
+* RESTful APIs
+* Dockerized setup
+* Automated testing
+* CI/CD with GitHub Actions
 
-Install dependencies: pip install -r requirements.txt
+## Tech Stack
 
-Create .env with DB credentials
+* FastAPI, Python
+* PostgreSQL, SQLAlchemy
+* Docker & Docker Compose
+* Pytest
+* GitHub Actions
+
+## Run Locally
+
+docker-compose up --build
+
+API docs available at `/docs`.
+
+## Testing
+
+pytest
 
 
-Run:
-
-uvicorn app.main:app --reload
-
-
-Swagger UI: http://127.0.0.1:8000/docs
+Built for learning backend development
