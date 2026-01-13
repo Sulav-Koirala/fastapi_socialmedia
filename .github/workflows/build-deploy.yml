@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  job1:
+  build:
     environment:
       name: CI/CD
     env:
@@ -63,3 +63,18 @@ jobs:
           context: .
           push: true
           tags: sulavk/fastapi_practice:latest
+  deploy:
+    environment:
+      name: CI/CD
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Deploying to Render
+        uses: actions/checkout@main 
+      - name: Create deployment
+        uses: sws2apps/render-deployment@main 
+        with:
+          serviceId: ${{ secrets.RENDER_SERVICE_ID }}
+          apiKey: ${{ secrets.RENDER_API_KEY }}
+          node-version: lts/Jod 
+          cli-version: 2.2.0 
